@@ -1,0 +1,118 @@
+package com.example.calcs;
+
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+
+    private TextView display;
+    private StringBuilder currentInput = new StringBuilder();
+    private double firstValue = 0;
+    private String operator = "";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        display = findViewById(R.id.display);
+        display.setText("0"); // Set initial display value
+
+        // Set number button listeners
+        setNumberClickListener(R.id.btn0, "0");
+        setNumberClickListener(R.id.btn1, "1");
+        setNumberClickListener(R.id.btn2, "2");
+        setNumberClickListener(R.id.btn3, "3");
+        setNumberClickListener(R.id.btn4, "4");
+        setNumberClickListener(R.id.btn5, "5");
+        setNumberClickListener(R.id.btn6, "6");
+        setNumberClickListener(R.id.btn7, "7");
+        setNumberClickListener(R.id.btn8, "8");
+        setNumberClickListener(R.id.btn9, "9");
+        setNumberClickListener(R.id.btnDecimal, ".");
+
+        // Set operator button listeners
+        setOperatorClickListener(R.id.btnAdd, "+");
+        setOperatorClickListener(R.id.btnSubtract, "-");
+        setOperatorClickListener(R.id.btnMultiply, "*");
+        setOperatorClickListener(R.id.btnDivide, "/");
+
+        // Clear button functionality
+        Button btnClear = findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(v -> {
+            display.setText("0");
+            currentInput.setLength(0);
+            firstValue = 0;
+            operator = "";
+        });
+
+        // Equals button functionality
+        Button btnEquals = findViewById(R.id.btnEquals);
+        btnEquals.setOnClickListener(v -> performCalculation());
+    }
+
+    // Function to handle number input
+    private void setNumberClickListener(int buttonId, String value) {
+        Button button = findViewById(buttonId);
+        button.setOnClickListener(v -> {
+            // Prevent multiple decimal points
+            if (value.equals(".") && currentInput.toString().contains(".")) {
+                return; // Ignore if there's already a decimal point
+            }
+            currentInput.append(value);
+            display.setText(currentInput.toString());
+        });
+    }
+
+    // Function to handle operator input
+    private void setOperatorClickListener(int buttonId, String op) {
+        Button button = findViewById(buttonId);
+        button.setOnClickListener(v -> {
+            if (currentInput.length() > 0) {
+                firstValue = Double.parseDouble(currentInput.toString());
+                operator = op;
+                currentInput.setLength(0); // Reset input for second value
+                display.setText("");
+            }
+        });
+    }
+
+    // Function to perform calculation
+    private void performCalculation() {
+        if (currentInput.length() == 0 || operator.isEmpty()) {
+            display.setText("Error"); // Handle empty input or operator
+            return;
+        }
+
+        double secondValue = Double.parseDouble(currentInput.toString());
+        double result = 0;
+
+        // Perform the operation based on the operator
+        switch (operator) {
+            case "+":
+                result = firstValue + secondValue;
+                break;
+            case "-":
+                result = firstValue - secondValue;
+                break;
+            case "*":
+                result = firstValue * secondValue;
+                break;
+            case "/":
+                if (secondValue != 0) {
+                    result = firstValue / secondValue;
+                } else {
+                    display.setText("Error");
+                    return;
+                }
+                break;
+        }
+
+        display.setText(String.valueOf(result));
+        currentInput.setLength(0);
+        currentInput.append(result); // Allow chaining operations
+        operator = ""; // Reset operator
+    }
+}
